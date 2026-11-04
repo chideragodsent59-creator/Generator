@@ -1,1 +1,304 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Mini Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            padding: 30px 20px;
+            color: white;
+        }
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 30px;
+            background: linear-gradient(90deg, #00d4ff, #f7931a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        /* TABS */
+        .tabs {
+            display: flex;
+            max-width: 420px;
+            margin: 0 auto 25px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 4px;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px 6px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #f7931a;
+            font-weight: bold;
+        }
+        
+        .container {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .card.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .output-box {
+            background: rgba(0,0,0,0.25);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 16px;
+            font-size: 15px;
+            color: #ddd;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-secondary { background: #2563eb; margin-top: 10px; }
+        .btn-success { background: #059669; margin-top: 10px; }
+        
+        /* Password options */
+        .options {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 6px 8px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: white;
+            text-align: center;
+        }
+        
+        /* Name picker */
+        .name-input {
+            width: 100%;
+            padding: 12px;
+            background: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .pulse {
+            animation: pulse 0.6s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>✨ Mini Generator</h1>
+    
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('quote')">💬 Quote</div>
+        <div class="tab" onclick="switchTab('password')">🔑 Password</div>
+        <div class="tab" onclick="switchTab('picker')">🎯 Pick Name</div>
+    </div>
+
+    <div class="container">
+        <!-- QUOTE GENERATOR -->
+        <div class="card active" id="card-quote">
+            <div class="card-title">💬 Daily Quote</div>
+            <div class="output-box" id="quoteOutput">"Click below to get inspired!"</div>
+            <button class="btn" onclick="getQuote()">✨ New Quote</button>
+        </div>
+
+        <!-- PASSWORD GENERATOR -->
+        <div class="card" id="card-password">
+            <div class="card-title">🔑 Password Generator</div>
+            <div class="output-box" id="passOutput">••••••••</div>
+            <div class="options">
+                <div class="option-row">
+                    <span>Length:</span>
+                    <input type="number" id="passLength" value="16" min="6" max="32">
+                </div>
+                <div class="option-row">
+                    <span>Include Numbers:</span>
+                    <input type="checkbox" id="passNumbers" checked>
+                </div>
+                <div class="option-row">
+                    <span>Include Symbols:</span>
+                    <input type="checkbox" id="passSymbols" checked>
+                </div>
+            </div>
+            <button class="btn" onclick="genPassword()">🔄 Generate</button>
+            <button class="btn btn-secondary" onclick="copyPassword()">📋 Copy</button>
+        </div>
+
+        <!-- RANDOM NAME PICKER -->
+        <div class="card" id="card-picker">
+            <div class="card-title">🎯 Random Name Picker</div>
+            <input type="text" class="name-input" id="nameInput" placeholder="Enter names separated by commas">
+            <div class="output-box" id="nameResult">Waiting for names...</div>
+            <button class="btn" onclick="pickName()">🎲 Pick One!</button>
+            <button class="btn btn-secondary" onclick="clearNames()">🗑️ Clear</button>
+        </div>
+    </div>
+
+    <script>
+        // SWITCH TABS
+        function switchTab(tabName) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show correct card
+            document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+            document.getElementById('card-' + tabName).classList.add('active');
+        }
+
+        // QUOTES
+        const quotes = [
+            { text: "Every great achievement was once just an idea.", author: "— Unknown" },
+            { text: "Start where you are. Use what you have. Do what you can.", author: "— Arthur Ashe" },
+            { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "— Winston Churchill" },
+            { text: "Don't watch the clock; do what it does. Keep going.", author: "— Sam Levenson" },
+            { text: "The best way to predict the future is to create it.", author: "— Peter Drucker" },
+            { text: "Believe you can and you're halfway there.", author: "— Theodore Roosevelt" },
+            { text: "Your only limit is your mind.", author: "— Unknown" },
+            { text: "Dream big. Start small. But most of all, start.", author: "— Simon Sinek" },
+            { text: "Difficult roads often lead to beautiful destinations.", author: "— Unknown" },
+            { text: "It always seems impossible until it's done.", author: "— Nelson Mandela" }
+        ];
+
+        function getQuote() {
+            const el = document.getElementById('quoteOutput');
+            el.style.opacity = '0';
+            setTimeout(() => {
+                const q = quotes[Math.floor(Math.random() * quotes.length)];
+                el.innerHTML = `"${q.text}"<br><small style="color:#888;margin-top:8px;display:block;">${q.author}</small>`;
+                el.style.opacity = '1';
+            }, 200);
+        }
+
+        // PASSWORD GENERATOR
+        function genPassword() {
+            const len = parseInt(document.getElementById('passLength').value);
+            const useNumbers = document.getElementById('passNumbers').checked;
+            const useSymbols = document.getElementById('passSymbols').checked;
+            
+            let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            if (useNumbers) chars += '0123456789';
+            if (useSymbols) chars += '!@#$%^&*()_+-=[]{}|;:,.?';
+            
+            let password = '';
+            for (let i = 0; i < len; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            const out = document.getElementById('passOutput');
+            out.textContent = password;
+            out.classList.add('pulse');
+            setTimeout(() => out.classList.remove('pulse'), 600);
+        }
+
+        function copyPassword() {
+            const pass = document.getElementById('passOutput').textContent;
+            if (pass && pass !== '••••••••') {
+                navigator.clipboard.writeText(pass).then(() => {
+                    const btn = event.target;
+                    const orig = btn.textContent;
+                    btn.textContent = '✓ Copied!';
+                    setTimeout(() => btn.textContent = orig, 2000);
+                });
+            }
+        }
+
+        // RANDOM NAME PICKER
+        function pickName() {
+            const input = document.getElementById('nameInput').value.trim();
+            const result = document.getElementById('nameResult');
+            
+            if (!input) {
+                result.textContent = 'Please enter some names first!';
+                return;
+            }
+            
+            const names = input.split(',').map(n => n.trim()).filter(n => n);
+            if (names.length < 2) {
+                result.textContent = 'Enter at least 2 names separated by comma';
+                return;
+            }
+            
+            // Animation: shuffle a few times then land
+            let count = 0;
+            const interval = setInterval(() => {
+                result.textContent = names[Math.floor(Math.random() * names.length)];
+                result.classList.add('pulse');
+                count++;
+                if (count > 10) {
+                    clearInterval(interval);
+                    const winner = names[Math.floor(Math.random() * names.length)];
+                    result.innerHTML = `🎉 <strong style="color:#00ff88;font-size:20px;">${winner}</strong> is the winner!`;
+                }
+            }, 80);
+        }
+
+        function clearNames() {
+            document.getElementById('nameInput').value = '';
+            document.getElementById('nameResult').textContent = 'Waiting for names...';
+        }
+    </script>
+</body>
+</html>
